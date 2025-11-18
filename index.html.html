@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline y Flujo Financiero | Proyecto Fresia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .gantt-container {
+            position: relative;
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        
+        .gantt-header {
+            display: flex;
+            border-bottom: 3px solid #cbd5e1;
+            padding-bottom: 12px;
+            margin-bottom: 8px;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+        
+        .gantt-month {
+            flex: 1;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .gantt-row {
+            display: flex;
+            align-items: center;
+            min-height: 40px;
+            border-bottom: 1px solid #f1f5f9;
+            position: relative;
+        }
+        
+        .gantt-row:hover {
+            background: #f8fafc;
+        }
+        
+        .gantt-label {
+            width: 320px;
+            padding-right: 16px;
+            font-size: 13px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .gantt-timeline {
+            flex: 1;
+            display: flex;
+            position: relative;
+            height: 32px;
+        }
+        
+        .gantt-bar {
+            position: absolute;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .gantt-bar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+        
+        .gantt-hito {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 20px solid #dc2626;
+            cursor: pointer;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            z-index: 10;
+        }
+        
+        .gantt-hito:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 4px 8px rgba(220,38,38,0.4));
+        }
+        
+        .fase-divider {
+            background: linear-gradient(90deg, #e2e8f0 0%, transparent 100%);
+            height: 2px;
+            margin: 12px 0;
+        }
+        
+        .fase-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .fase-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+<div class="max-w-[1800px] mx-auto p-6">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-900 via-slate-900 to-blue-900 rounded-2xl p-8 mb-6 text-white shadow-xl">
+        <h1 class="text-4xl font-black mb-2">Timeline Visual del Proyecto</h1>
+        <p class="text-xl text-blue-200">Fábrica Biochar Fresia | Nov 2025 - Mar 2026</p>
+        <p class="text-sm text-slate-300 mt-2">49 Actividades | Presupuesto $89.1M | 124 días</p>
+    </div>
+
+    <!-- Flujo Financiero -->
+    <div class="bg-white rounded-2xl p-8 mb-6 shadow-lg">
+        <h2 class="text-2xl font-black text-slate-900 mb-6">💰 Flujo de Egresos Mensuales</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border-l-4 border-blue-600">
+                <div class="text-sm text-blue-700 font-semibold mb-1">Noviembre 2025</div>
+                <div class="text-3xl font-black text-blue-900">$29.1M</div>
+                <div class="text-xs text-blue-600 mt-2">33% del presupuesto</div>
+                <div class="text-xs text-slate-500 mt-1">Arranque + fondos</div>
+            </div>
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-l-4 border-green-600 ring-4 ring-green-200">
+                <div class="text-sm text-green-700 font-semibold mb-1">Diciembre 2025</div>
+                <div class="text-4xl font-black text-green-900">$38.0M</div>
+                <div class="text-xs text-green-600 mt-2 font-bold">43% - PICO DE INVERSIÓN</div>
+                <div class="text-xs text-slate-500 mt-1">13 tareas activas</div>
+            </div>
+            <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 border-l-4 border-amber-600">
+                <div class="text-sm text-amber-700 font-semibold mb-1">Enero 2026</div>
+                <div class="text-3xl font-black text-amber-900">$16.7M</div>
+                <div class="text-xs text-amber-600 mt-2">19% del presupuesto</div>
+                <div class="text-xs text-slate-500 mt-1">Certificaciones</div>
+            </div>
+            <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-6 border-l-4 border-red-600">
+                <div class="text-sm text-red-700 font-semibold mb-1">Febrero 2026</div>
+                <div class="text-3xl font-black text-red-900">$5.3M</div>
+                <div class="text-xs text-red-600 mt-2">6% del presupuesto</div>
+                <div class="text-xs text-slate-500 mt-1">Solo reactores</div>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-6">
+            <canvas id="flujoChart" height="80"></canvas>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="text-center bg-slate-900 text-white rounded-lg px-8 py-4">
+                <div class="text-sm text-slate-300 mb-1">Total Presupuesto</div>
+                <div class="text-4xl font-black">$89.1M</div>
+                <div class="text-xs text-slate-400 mt-1">4 meses (Nov-Feb)</div>
+            </div>
+            <div class="text-center bg-green-700 text-white rounded-lg px-8 py-4">
+                <div class="text-sm text-green-200 mb-1">Pico de Inversión</div>
+                <div class="text-4xl font-black">Dic 2025</div>
+                <div class="text-xs text-green-200 mt-1">$38M en infraestructura</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desglose Diciembre -->
+    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-8 mb-6 shadow-lg border-2 border-green-300">
+        <h2 class="text-2xl font-black text-green-900 mb-6">🔍 Desglose Diciembre 2025 (Mes Crítico - $38M)</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-lg p-4 text-center">
+                <div class="text-2xl font-black text-green-800">$11.7M</div>
+                <div class="text-xs text-slate-600">Sistema Líquidos</div>
+                <div class="text-xs text-slate-500 mt-1">31%</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <div class="text-2xl font-black text-green-800">$9.8M</div>
+                <div class="text-xs text-slate-600">Techumbre</div>
+                <div class="text-xs text-slate-500 mt-1">26%</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <div class="text-2xl font-black text-green-800">$6.5M</div>
+                <div class="text-xs text-slate-600">Obras Civiles</div>
+                <div class="text-xs text-slate-500 mt-1">17%</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <div class="text-2xl font-black text-green-800">$4.4M</div>
+                <div class="text-xs text-slate-600">Equipamiento</div>
+                <div class="text-xs text-slate-500 mt-1">12%</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <div class="text-2xl font-black text-green-800">$3.4M</div>
+                <div class="text-xs text-slate-600">Sistema Agua</div>
+                <div class="text-xs text-slate-500 mt-1">9%</div>
+            </div>
+            <div class="bg-white rounded-lg p-4 text-center">
+                <div class="text-2xl font-black text-green-800">$1.9M</div>
+                <div class="text-xs text-slate-600">Eléctrico</div>
+                <div class="text-xs text-slate-500 mt-1">5%</div>
+            </div>
+        </div>
+        <div class="mt-4 text-center text-sm text-green-800 font-semibold">
+            13 tareas ejecutándose simultáneamente: Piscina, Viga H, Techumbre, Drenaje, Canalizaciones, Eléctrico
+        </div>
+    </div>
+
+    <!-- Timeline Gantt Visual -->
+    <div class="gantt-container shadow-xl">
+        <h2 class="text-2xl font-black text-slate-900 mb-6">📊 Timeline de Actividades (Vista Gantt)</h2>
+        
+        <div class="mb-6 flex flex-wrap gap-3 text-xs">
+            <div class="flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-blue-600"></div>
+                <span>Gestión</span>
+            </div>
+            <div class="flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-amber-600"></div>
+                <span>Transporte</span>
+            </div>
+            <div class="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-green-600"></div>
+                <span>Obras Civiles</span>
+            </div>
+            <div class="flex items-center gap-2 bg-purple-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-purple-600"></div>
+                <span>Equipamiento</span>
+            </div>
+            <div class="flex items-center gap-2 bg-cyan-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-cyan-600"></div>
+                <span>Líquidos</span>
+            </div>
+            <div class="flex items-center gap-2 bg-pink-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-pink-600"></div>
+                <span>Instrumentación</span>
+            </div>
+            <div class="flex items-center gap-2 bg-orange-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-orange-600"></div>
+                <span>Techumbre</span>
+            </div>
+            <div class="flex items-center gap-2 bg-teal-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-teal-600"></div>
+                <span>Agua</span>
+            </div>
+            <div class="flex items-center gap-2 bg-yellow-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-yellow-600"></div>
+                <span>Eléctrico</span>
+            </div>
+            <div class="flex items-center gap-2 bg-red-50 px-3 py-1 rounded-full">
+                <div class="w-3 h-3 rounded-full bg-red-600"></div>
+                <span>Pruebas</span>
+            </div>
+        </div>
+
+        <div class="gantt-header" style="padding-left: 320px;">
+            <div class="gantt-month bg-blue-50">Noviembre 2025</div>
+            <div class="gantt-month bg-green-50">Diciembre 2025</div>
+            <div class="gantt-month bg-amber-50">Enero 2026</div>
+            <div class="gantt-month bg-red-50">Febrero 2026</div>
+            <div class="gantt-month bg-purple-50">Marzo 2026</div>
+        </div>
+
+        <div id="gantt-timeline-container">
+            <!-- Generado por JavaScript -->
+        </div>
+    </div>
+
+    <!-- Hitos Críticos -->
+    <div class="mt-6 bg-gradient-to-r from-red-900 to-red-800 rounded-2xl p-8 text-white">
+        <h2 class="text-2xl font-black mb-6">🎯 Hitos Críticos del Proyecto</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white/10 backdrop-blur rounded-xl p-6">
+                <div class="text-4xl mb-2">1️⃣</div>
+                <div class="text-2xl font-black mb-2">01 Dic 2025</div>
+                <div class="text-red-100 font-semibold">Marcha Blanca R1</div>
+                <div class="text-xs text-red-200 mt-2">Inicio operación de prueba</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur rounded-xl p-6">
+                <div class="text-4xl mb-2">2️⃣</div>
+                <div class="text-2xl font-black mb-2">09 Feb 2026</div>
+                <div class="text-red-100 font-semibold">Operación Formal R1</div>
+                <div class="text-xs text-red-200 mt-2">R1 operando establemente</div>
+            </div>
+            <div class="bg-white/10 backdrop-blur rounded-xl p-6">
+                <div class="text-4xl mb-2">3️⃣</div>
+                <div class="text-2xl font-black mb-2">09 Mar 2026</div>
+                <div class="text-red-100 font-semibold">Operación 24/7</div>
+                <div class="text-xs text-red-200 mt-2">R1+R2+R3 completo</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Datos financieros CORREGIDOS
+const flujoMensual = {
+    'Nov 2025': 29051846,
+    'Dic 2025': 38039403,  // CORREGIDO - PICO
+    'Ene 2026': 16696259,
+    'Feb 2026': 5331200    // CORREGIDO - Solo reactores
+};
+
+// Gráfico de flujo financiero
+const ctx = document.getElementById('flujoChart').getContext('2d');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Nov 2025', 'Dic 2025', 'Ene 2026', 'Feb 2026'],
+        datasets: [{
+            label: 'Egresos Mensuales (CLP)',
+            data: [29051846, 38039403, 16696259, 5331200],
+            backgroundColor: [
+                'rgba(59, 130, 246, 0.8)',
+                'rgba(34, 197, 94, 0.9)',
+                'rgba(251, 146, 60, 0.8)',
+                'rgba(239, 68, 68, 0.8)'
+            ],
+            borderColor: [
+                'rgb(59, 130, 246)',
+                'rgb(34, 197, 94)',
+                'rgb(251, 146, 60)',
+                'rgb(239, 68, 68)'
+            ],
+            borderWidth: 3,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const pct = (context.parsed.y / 89118708 * 100).toFixed(0);
+                        return '$' + context.parsed.y.toLocaleString('es-CL') + ` CLP (${pct}%)`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return '$' + (value / 1000000).toFixed(1) + 'M';
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Millones CLP',
+                    font: { size: 14, weight: 'bold' }
+                }
+            }
+        }
+    }
+});
+
+// Datos de tareas
+const tareas = [
+    // GESTIÓN
+    {id: '0.1', nombre: 'Solicitud y recepción de fondos', fase: 'Gestión', inicio: '2025-11-12', duracion: 10, hito: false},
+    {id: '0.2', nombre: 'Coordinación supervisión externa', fase: 'Gestión', inicio: '2025-11-21', duracion: 2, hito: false},
+    
+    // OBRAS CIVILES
+    {id: '2.1', nombre: 'Radier R2 - materiales', fase: 'Obras Civiles', inicio: '2025-11-24', duracion: 1, hito: false},
+    {id: '2.2', nombre: 'Radier R2 - construcción', fase: 'Obras Civiles', inicio: '2025-11-26', duracion: 21, hito: false},
+    {id: '2.3', nombre: 'Radier 3º - materiales', fase: 'Obras Civiles', inicio: '2025-11-24', duracion: 1, hito: false},
+    {id: '2.4', nombre: 'Radier 3º - construcción', fase: 'Obras Civiles', inicio: '2025-11-26', duracion: 21, hito: false},
+    {id: '2.5', nombre: 'Inspección radiers', fase: 'Obras Civiles', inicio: '2025-12-29', duracion: 1, hito: false},
+    
+    // INSTRUMENTACIÓN
+    {id: '5.1', nombre: 'Dinamómetro - compra', fase: 'Instrumentación', inicio: '2025-11-22', duracion: 1, hito: false},
+    {id: '5.2', nombre: 'Certificación dinamómetro', fase: 'Instrumentación', inicio: '2025-11-22', duracion: 1, hito: false},
+    {id: '5.3', nombre: 'Trípode provisorio', fase: 'Instrumentación', inicio: '2025-11-25', duracion: 3, hito: false},
+    {id: '5.4', nombre: 'Instalación dinamómetro en tecle', fase: 'Instrumentación', inicio: '2026-01-23', duracion: 1, hito: false},
+    
+    // EQUIPAMIENTO
+    {id: '3.1', nombre: 'Viga H 15m - fabricación', fase: 'Equipamiento', inicio: '2025-12-01', duracion: 30, hito: false},
+    {id: '3.2', nombre: 'Apoyos y columnas', fase: 'Equipamiento', inicio: '2025-12-01', duracion: 30, hito: false},
+    {id: '3.3', nombre: 'Soldadura y montaje', fase: 'Equipamiento', inicio: '2026-01-05', duracion: 14, hito: false},
+    {id: '3.4', nombre: 'Instalación Tecle LIFTWORKS', fase: 'Equipamiento', inicio: '2026-01-20', duracion: 2, hito: false},
+    {id: '3.5', nombre: 'Certificación Tecle', fase: 'Equipamiento', inicio: '2026-01-22', duracion: 1, hito: false},
+    
+    // LÍQUIDOS
+    {id: '4.1', nombre: 'Excavación piscina', fase: 'Líquidos', inicio: '2025-12-01', duracion: 3, hito: false},
+    {id: '4.2', nombre: 'Instalación piscina HDPE', fase: 'Líquidos', inicio: '2025-12-04', duracion: 10, hito: false},
+    {id: '4.3', nombre: 'Sistema drenaje', fase: 'Líquidos', inicio: '2025-12-15', duracion: 5, hito: false},
+    {id: '4.4', nombre: 'Cámara registro + tubos', fase: 'Líquidos', inicio: '2025-12-08', duracion: 5, hito: false},
+    {id: '4.5', nombre: 'Pruebas hermeticidad', fase: 'Líquidos', inicio: '2025-12-15', duracion: 1, hito: false},
+    
+    // TECHUMBRE
+    {id: '6.1', nombre: 'Estructura metálica', fase: 'Techumbre', inicio: '2025-12-01', duracion: 20, hito: false},
+    {id: '6.2', nombre: 'Montaje estructura', fase: 'Techumbre', inicio: '2025-12-22', duracion: 10, hito: false},
+    {id: '6.3', nombre: 'Cubierta techumbre', fase: 'Techumbre', inicio: '2026-01-05', duracion: 10, hito: false},
+    {id: '6.4', nombre: 'Sistema eléctrico techumbre', fase: 'Techumbre', inicio: '2026-01-19', duracion: 5, hito: false},
+    {id: '6.5', nombre: 'Iluminación', fase: 'Techumbre', inicio: '2026-01-26', duracion: 5, hito: false},
+    
+    // AGUA
+    {id: '7.1', nombre: 'Motor periférico', fase: 'Agua', inicio: '2025-12-15', duracion: 1, hito: false},
+    {id: '7.2', nombre: 'Canalización casa 50m', fase: 'Agua', inicio: '2025-12-16', duracion: 5, hito: false},
+    {id: '7.3', nombre: 'Canalización biochar 200m', fase: 'Agua', inicio: '2025-12-01', duracion: 10, hito: false},
+    {id: '7.4', nombre: 'Estanques 1000L', fase: 'Agua', inicio: '2025-12-08', duracion: 5, hito: false},
+    {id: '7.5', nombre: 'Pruebas presión', fase: 'Agua', inicio: '2025-12-15', duracion: 1, hito: false},
+    
+    // ELÉCTRICO
+    {id: '8.1', nombre: 'Extensión 20m', fase: 'Eléctrico', inicio: '2025-12-01', duracion: 5, hito: false},
+    {id: '8.2', nombre: 'Alimentación tecle', fase: 'Eléctrico', inicio: '2025-12-08', duracion: 5, hito: false},
+    {id: '8.3', nombre: 'Tablero eléctrico', fase: 'Eléctrico', inicio: '2025-12-08', duracion: 5, hito: false},
+    {id: '8.4', nombre: 'Certificación SEC', fase: 'Eléctrico', inicio: '2025-12-15', duracion: 30, hito: false},
+    
+    // PRUEBAS
+    {id: '9.3a', nombre: 'Ciclo prueba marcha blanca', fase: 'Pruebas', inicio: '2025-11-28', duracion: 3, hito: false},
+    {id: '9.4a', nombre: 'Capacitación inicial', fase: 'Pruebas', inicio: '2025-11-28', duracion: 3, hito: false},
+    {id: '9.5a', nombre: '🎯 MARCHA BLANCA R1', fase: 'Pruebas', inicio: '2025-12-01', duracion: 0, hito: true},
+    {id: '9.1', nombre: 'Pruebas integradas', fase: 'Pruebas', inicio: '2026-01-26', duracion: 5, hito: false},
+    {id: '9.2', nombre: 'Ajustes finales', fase: 'Pruebas', inicio: '2026-02-02', duracion: 5, hito: false},
+    {id: '9.5b', nombre: '🎯 OPERACIÓN FORMAL R1', fase: 'Pruebas', inicio: '2026-02-09', duracion: 0, hito: true},
+    
+    // TRANSPORTE
+    {id: '1.1', nombre: 'Transporte R2 y R3', fase: 'Transporte', inicio: '2026-02-27', duracion: 1, hito: false},
+    {id: '1.2', nombre: 'Descarga reactores', fase: 'Transporte', inicio: '2026-02-27', duracion: 1, hito: false},
+    {id: '1.3', nombre: 'Instalación R2', fase: 'Transporte', inicio: '2026-02-27', duracion: 1, hito: false},
+    {id: '1.4', nombre: 'Instalación R3', fase: 'Transporte', inicio: '2026-03-01', duracion: 1, hito: false},
+    {id: '1.5', nombre: 'Conexiones finales', fase: 'Transporte', inicio: '2026-03-02', duracion: 1, hito: false},
+    
+    // PRUEBAS FINALES
+    {id: '9.3b', nombre: 'Ciclo prueba R2+R3', fase: 'Pruebas', inicio: '2026-03-03', duracion: 3, hito: false},
+    {id: '9.4b', nombre: 'Capacitación completa', fase: 'Pruebas', inicio: '2026-03-06', duracion: 3, hito: false},
+    {id: '9.6', nombre: '🎯 OPERACIÓN 24/7', fase: 'Pruebas', inicio: '2026-03-09', duracion: 0, hito: true}
+];
+
+// Función para calcular posición en timeline
+function calcularPosicion(fecha, duracion) {
+    const fechaInicio = new Date('2025-11-12');
+    const fechaFin = new Date('2026-03-15');
+    const rangoTotal = (fechaFin - fechaInicio) / (1000 * 60 * 60 * 24);
+    
+    const fechaTarea = new Date(fecha);
+    const offset = (fechaTarea - fechaInicio) / (1000 * 60 * 60 * 24);
+    const left = (offset / rangoTotal) * 100;
+    const width = (duracion / rangoTotal) * 100;
+    
+    return { left: Math.max(0, left), width: Math.max(0, width) };
+}
+
+// Colores por fase
+const coloresFase = {
+    'Gestión': '#3b82f6',
+    'Transporte': '#f59e0b',
+    'Obras Civiles': '#10b981',
+    'Equipamiento': '#8b5cf6',
+    'Líquidos': '#06b6d4',
+    'Instrumentación': '#ec4899',
+    'Techumbre': '#f97316',
+    'Agua': '#14b8a6',
+    'Eléctrico': '#eab308',
+    'Pruebas': '#ef4444'
+};
+
+// Generar timeline visual
+function generarGantt() {
+    const container = document.getElementById('gantt-timeline-container');
+    
+    // Agrupar por fase
+    const fases = {};
+    tareas.forEach(tarea => {
+        if (!fases[tarea.fase]) {
+            fases[tarea.fase] = [];
+        }
+        fases[tarea.fase].push(tarea);
+    });
+    
+    // Renderizar cada fase
+    Object.entries(fases).forEach(([nombreFase, tareasFase]) => {
+        // Título de fase
+        const faseTitle = document.createElement('div');
+        faseTitle.className = 'fase-title';
+        faseTitle.innerHTML = `
+            <div class="fase-dot" style="background: ${coloresFase[nombreFase]}"></div>
+            ${nombreFase} (${tareasFase.length})
+        `;
+        container.appendChild(faseTitle);
+        
+        // Tareas de la fase
+        tareasFase.forEach(tarea => {
+            const row = document.createElement('div');
+            row.className = 'gantt-row';
+            
+            const label = document.createElement('div');
+            label.className = 'gantt-label';
+            label.innerHTML = `
+                <span class="text-xs font-bold text-slate-400">${tarea.id}</span>
+                <span class="text-slate-700">${tarea.nombre}</span>
+            `;
+            
+            const timeline = document.createElement('div');
+            timeline.className = 'gantt-timeline';
+            
+            if (tarea.hito) {
+                const pos = calcularPosicion(tarea.inicio, 0);
+                const hito = document.createElement('div');
+                hito.className = 'gantt-hito';
+                hito.style.left = `${pos.left}%`;
+                hito.style.top = '6px';
+                hito.title = tarea.nombre;
+                timeline.appendChild(hito);
+            } else {
+                const pos = calcularPosicion(tarea.inicio, tarea.duracion);
+                const bar = document.createElement('div');
+                bar.className = 'gantt-bar';
+                bar.style.left = `${pos.left}%`;
+                bar.style.width = `${pos.width}%`;
+                bar.style.background = coloresFase[nombreFase];
+                bar.textContent = tarea.duracion > 0 ? `${tarea.duracion}d` : '';
+                bar.title = `${tarea.nombre} (${tarea.duracion}d)`;
+                timeline.appendChild(bar);
+            }
+            
+            row.appendChild(label);
+            row.appendChild(timeline);
+            container.appendChild(row);
+        });
+        
+        // Separador
+        const divider = document.createElement('div');
+        divider.className = 'fase-divider';
+        container.appendChild(divider);
+    });
+}
+
+// Inicializar
+generarGantt();
+</script>
+
+</body>
+</html>
